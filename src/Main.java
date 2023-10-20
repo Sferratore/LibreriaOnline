@@ -20,6 +20,8 @@ public class Main {
 		u.setId(1);
 		
 		o.LibriConsigliati(u);
+		
+		o.LibriPopolari();
 	}
 
 }

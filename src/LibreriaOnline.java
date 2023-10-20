@@ -15,117 +15,139 @@ public class LibreriaOnline {
 	// -------------------CONSTRUCTORS--------------------
 
 	public LibreriaOnline() {
-		
+
 		this.listaLibri = new ArrayList<Libro>();
 		this.listaUtenti = new ArrayList<Utente>();
 		this.listaRecensioni = new ArrayList<Recensione>();
-		
+
 		this.connectToDb();
 		try {
 			this.sync();
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println("Qualcosa è andato storto: " + e.toString());
 		}
-		
+
 	}
 
 	// -------------------METHODS-------------------------
-	
+
 	public void aggiungiUtente(Utente u) {
 		String sql = "INSERT INTO Utente (id, nome, email) VALUES (?, ?, ?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, u.getId());
-            pstmt.setString(2, u.getNome());
-            pstmt.setString(3, u.getEmail());
-            
-            
-            //AGGIUNTA LISTA LIBRI?
-            
-            pstmt.executeUpdate();
-        }
-        catch(Exception e) {
+		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+			pstmt.setInt(1, u.getId());
+			pstmt.setString(2, u.getNome());
+			pstmt.setString(3, u.getEmail());
+
+			// AGGIUNTA LISTA LIBRI?
+
+			pstmt.executeUpdate();
+		} catch (Exception e) {
 			System.out.println("Qualcosa è andato storto: " + e.toString());
 		}
-        
+
 		this.listaUtenti.add(u);
 	}
-	
+
 	public void aggiungiLibro(Libro l) {
-		
+
 		String sql = "INSERT INTO Libro (titolo, autore, genere, prezzo) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, l.getTitolo());
-            pstmt.setString(2, l.getAutore());
-            pstmt.setString(3, l.getGenere());
-            pstmt.setFloat(4, l.getPrezzo());
-            pstmt.executeUpdate();
-        }
-        catch(Exception e) {
+		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+			pstmt.setString(1, l.getTitolo());
+			pstmt.setString(2, l.getAutore());
+			pstmt.setString(3, l.getGenere());
+			pstmt.setFloat(4, l.getPrezzo());
+			pstmt.executeUpdate();
+		} catch (Exception e) {
 			System.out.println("Qualcosa è andato storto: " + e.toString());
 		}
-        
+
 		this.listaLibri.add(l);
 	}
-	
+
 	public void aggiungiRecensione(Recensione r) {
-		
+
 		String sql = "INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, Integer.parseInt(r.getUtente()));
-            pstmt.setInt(2, Integer.parseInt(r.getLibro()));
-            pstmt.setInt(3, r.getValutazione());
-            pstmt.setString(4, r.getCommento());
-            pstmt.executeUpdate();
-        }catch(Exception e) {
+		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+			pstmt.setInt(1, Integer.parseInt(r.getUtente()));
+			pstmt.setInt(2, Integer.parseInt(r.getLibro()));
+			pstmt.setInt(3, r.getValutazione());
+			pstmt.setString(4, r.getCommento());
+			pstmt.executeUpdate();
+		} catch (Exception e) {
 			System.out.println("Qualcosa è andato storto: " + e.toString());
 		}
 		this.listaRecensioni.add(r);
 	}
 
 	public void mostraLibri() {
-		for(Libro l : this.listaLibri) {
+		for (Libro l : this.listaLibri) {
 			System.out.println(l);
 		}
-			
+
 	}
-	
+
 	public void mostraUtenti() {
-		for(Utente u : this.listaUtenti) {
+		for (Utente u : this.listaUtenti) {
 			System.out.println(u);
 		}
-			
+
 	}
-	
+
 	public void LibriConsigliati(Utente u) {
-		
+
 		PreparedStatement prpSt;
 		ResultSet rs;
-		
+
 		try {
 			prpSt = this.connection.prepareStatement("CALL LibriConsigliati(?)");
 			prpSt.setInt(1, u.getId());
 			rs = prpSt.executeQuery();
-			
+
 			System.out.println("LIBRI CONSIGLIATI: ");
-			while(rs.next()) {
+			while (rs.next()) {
 				Libro l = new Libro();
 				l.setId(rs.getInt("id"));
 				l.setTitolo(rs.getString("titolo"));
 				l.setAutore(rs.getString("autore"));
 				l.setGenere(rs.getString("genere"));
-				l.setPrezzo ((float) rs.getDouble("prezzo"));
+				l.setPrezzo((float) rs.getDouble("prezzo"));
 				System.out.println(l);
 			}
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+
 	}
-	
+
+	public void LibriPopolari() {
+
+		PreparedStatement prpSt;
+		ResultSet rs;
+
+		try {
+			prpSt = this.connection.prepareStatement("CALL LibriPopolari()");
+			rs = prpSt.executeQuery();
+
+			System.out.println("LIBRI POPOLARI: ");
+			while (rs.next()) {
+				Libro l = new Libro();
+				l.setId(rs.getInt("id"));
+				l.setTitolo(rs.getString("titolo"));
+				l.setAutore(rs.getString("autore"));
+				l.setGenere(rs.getString("genere"));
+				l.setPrezzo((float) rs.getDouble("prezzo"));
+				System.out.println(l);
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
 	private void sync() throws Exception {
 
 		ArrayList<Utente> utentiDaAggiungere = new ArrayList<Utente>();
@@ -152,7 +174,7 @@ public class LibreriaOnline {
 				l.setTitolo(rs.getString("titolo"));
 				l.setAutore(rs.getString("autore"));
 				l.setGenere(rs.getString("genere"));
-				l.setPrezzo ((float) rs.getDouble("prezzo"));
+				l.setPrezzo((float) rs.getDouble("prezzo"));
 				libriDaAggiungere.add(l);
 			}
 
@@ -173,37 +195,39 @@ public class LibreriaOnline {
 			rs = prpSt.executeQuery();
 
 			while (rs.next()) {
-				
+
 				Utente u = new Utente();
 				ResultSet libriDiUtenteRs;
 				ArrayList<Libro> libriDiUtente = new ArrayList<Libro>();
-				
+
 				u.setId(rs.getInt("id"));
 				u.setNome(rs.getString("nome"));
 				u.setEmail(rs.getString("email"));
-				
-				//Impostare libri acquistati
-				prpSt= this.connection.prepareStatement("SELECT * FROM Libro WHERE id in (SELECT libro FROM Acquisti WHERE utente = " + u.getId() + ")");
+
+				// Impostare libri acquistati
+				prpSt = this.connection
+						.prepareStatement("SELECT * FROM Libro WHERE id in (SELECT libro FROM Acquisti WHERE utente = "
+								+ u.getId() + ")");
 				libriDiUtenteRs = prpSt.executeQuery();
-				
-				while(libriDiUtenteRs.next()) {
+
+				while (libriDiUtenteRs.next()) {
 					Libro l = new Libro();
 					l.setId(libriDiUtenteRs.getInt("id"));
 					l.setTitolo(libriDiUtenteRs.getString("titolo"));
 					l.setAutore(libriDiUtenteRs.getString("autore"));
 					l.setGenere(libriDiUtenteRs.getString("genere"));
-					l.setPrezzo ((float) libriDiUtenteRs.getDouble("prezzo"));
+					l.setPrezzo((float) libriDiUtenteRs.getDouble("prezzo"));
 					libriDiUtente.add(l);
 				}
 				u.setLibriAcquistati(libriDiUtente);
 				utentiDaAggiungere.add(u);
-				
+
 			}
-			
+
 			this.listaLibri = libriDaAggiungere;
 			this.listaRecensioni = recensioniDaAggiungere;
 			this.listaUtenti = utentiDaAggiungere;
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Something went wrong with SQL operations: " + e.toString());
@@ -214,7 +238,7 @@ public class LibreriaOnline {
 	}
 
 	public String connectToDb() {
-		
+
 		try {
 			Class.forName(JConnectionClass);
 		} catch (ClassNotFoundException e) {
