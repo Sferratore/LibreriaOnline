@@ -5,6 +5,7 @@ public class Main {
 		// TODO Auto-generated method stub
 		LibreriaOnline o = new LibreriaOnline();
 		Libro l = new Libro();
+		Utente u = new Utente();
 		
 		l.setAutore("aa");
 		l.setGenere("genere");
@@ -15,6 +16,10 @@ public class Main {
 		o.aggiungiLibro(l);
 		
 		o.mostraUtenti();
+		
+		u.setId(1);
+		
+		o.LibriConsigliati(u);
 	}
 
 }

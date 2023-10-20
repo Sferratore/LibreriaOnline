@@ -58,6 +58,35 @@ public class LibreriaOnline {
 			
 	}
 	
+	public void LibriConsigliati(Utente u) {
+		
+		PreparedStatement prpSt;
+		ResultSet rs;
+		
+		try {
+			prpSt = this.connection.prepareStatement("CALL LibriConsigliati(?)");
+			prpSt.setInt(1, u.getId());
+			rs = prpSt.executeQuery();
+			
+			System.out.println("LIBRI CONSIGLIATI: \n");
+			while(rs.next()) {
+				Libro l = new Libro();
+				l.setId(rs.getInt("id"));
+				l.setTitolo(rs.getString("titolo"));
+				l.setAutore(rs.getString("autore"));
+				l.setGenere(rs.getString("genere"));
+				l.setPrezzo ((float) rs.getDouble("prezzo"));
+				System.out.println(l);
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
 	private void sync() throws Exception {
 
 		ArrayList<Utente> utentiDaAggiungere = new ArrayList<Utente>();

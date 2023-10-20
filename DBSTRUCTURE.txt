@@ -37,3 +37,35 @@ CREATE TABLE Acquisti (
     FOREIGN KEY (utente) REFERENCES Utente(id) ON DELETE CASCADE,
     FOREIGN KEY (libro) REFERENCES Libro(id) ON DELETE CASCADE
 );
+
+
+
+-- Procedura Libri consigliati
+
+CREATE PROCEDURE LibriConsigliati(IN userID INT)
+BEGIN
+    -- Seleziona colonne dalla tabella Libro
+    SELECT L.id, L.titolo, L.autore, L.genere, L.prezzo
+    FROM Libro L
+    -- Unisciti alla tabella Acquisti sulla colonna di libro. Questo è utilizzato principalmente per escludere libri già acquistati dall'utente.
+    JOIN Acquisti A ON L.id = A.libro
+    -- Unisciti ad una subquery che calcola la valutazione media per ogni libro
+    LEFT JOIN (
+        SELECT libro, AVG(valutazione) AS punteggio_medio
+        FROM Recensione
+        GROUP BY libro
+    ) AS R ON L.id = R.libro
+    WHERE 
+        -- Considera solo libri dello stesso autore di quelli già acquistati dall'utente
+        (L.autore IN (SELECT autore FROM Libro JOIN Acquisti ON Libro.id = Acquisti.libro WHERE Acquisti.utente = userID) 
+        -- ...O dello stesso genere di quelli già acquistati dall'utente
+        OR L.genere IN (SELECT genere FROM Libro JOIN Acquisti ON Libro.id = Acquisti.libro WHERE Acquisti.utente = userID))
+        -- Escludi libri che l'utente ha già acquistato
+        AND L.id NOT IN (SELECT libro FROM Acquisti WHERE utente = userID)
+        -- Considera solo libri con una valutazione media di almeno 4 o quelli senza recensioni (R.punteggio_medio è NULL)
+        AND (R.punteggio_medio >= 4 OR R.punteggio_medio IS NULL)
+    -- Raggruppa per evitare duplicati (anche se JOIN e le condizioni WHERE dovrebbero già assicurarsi che non ci siano duplicati)
+    GROUP BY L.id, L.titolo, L.autore, L.genere, L.prezzo
+    -- Ordina prima per punteggio medio decrescente e poi per titolo in ordine alfabetico
+    ORDER BY R.punteggio_medio DESC, L.titolo ASC;
+END //
