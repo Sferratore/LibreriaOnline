@@ -3,7 +3,7 @@
 public class Libro {
 
 	public void mostraDettagli() {
-		//una specie di toString??
+		System.out.println(this.toString());
 	}
 	
 	public Libro() {

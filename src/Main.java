@@ -13,7 +13,8 @@ public class Main {
 		l.setPrezzo(22);
 		l.setTitolo("Poggibonzi");
 		
-		o.aggiungiLibro(l);
+		
+		/*o.aggiungiLibro(l);
 		
 		o.mostraUtenti();
 		
@@ -22,6 +23,11 @@ public class Main {
 		o.LibriConsigliati(u);
 		
 		o.LibriPopolari();
+		
+		System.out.println(o.mediaIdLibro(3));*/
+		System.out.println(o.mediaLibro(o.getLibro(2)));
+		
+		
 	}
 
 }

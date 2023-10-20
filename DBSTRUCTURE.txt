@@ -69,3 +69,184 @@ BEGIN
     -- Ordina prima per punteggio medio decrescente e poi per titolo in ordine alfabetico
     ORDER BY R.punteggio_medio DESC, L.titolo ASC;
 END //
+
+
+
+
+-- Procedura Libri Popolari
+
+
+
+DELIMITER //
+
+CREATE PROCEDURE LibriPopolari()
+BEGIN
+    -- Selezioniamo le colonne desiderate dal libro e le informazioni aggregate delle recensioni
+    SELECT 
+        L.id, L.titolo, L.autore, L.genere, L.prezzo,
+        R.punteggio_medio, R.numero_recensioni
+    FROM 
+        -- Usiamo la tabella dei libri come base per il nostro risultato
+        Libro L
+    -- Eseguiamo una LEFT JOIN con una subquery che aggrega le informazioni delle recensioni
+    LEFT JOIN (
+        -- In questa subquery, aggregiamo le recensioni per libro
+        SELECT 
+            libro, 
+            AVG(valutazione) AS punteggio_medio, -- calcoliamo la media delle valutazioni per ogni libro
+            COUNT(libro) AS numero_recensioni     -- contiamo il numero totale di recensioni per ogni libro
+        FROM Recensione
+        GROUP BY libro                            -- raggruppiamo per libro per avere una riga per ogni libro
+    ) AS R ON L.id = R.libro                      -- collega ogni libro alla sua corrispondente riga aggregata di recensione (se esiste)
+    WHERE 
+        R.punteggio_medio >= 4                    -- Filtra per libri con una valutazione media di 4 o superiore
+    ORDER BY 
+        R.numero_recensioni DESC,                 -- Ordina per numero di recensioni (i libri più popolari per prime)
+        L.titolo ASC;                             -- in caso di numero uguale di recensioni, ordina alfabeticamente per titolo
+END //
+
+DELIMITER ;
+
+
+
+
+-- Riempimento di esempio 
+
+-- Creazione del database
+CREATE DATABASE LibreriaOnline;
+USE LibreriaOnline;
+
+-- Creazione della tabella Utente
+CREATE TABLE Utente (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL
+);
+
+-- Creazione della tabella Libro
+CREATE TABLE Libro (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titolo VARCHAR(255) NOT NULL,
+    autore VARCHAR(255) NOT NULL,
+    genere VARCHAR(255) NOT NULL,
+    prezzo DECIMAL(10,2) NOT NULL
+);
+
+-- Creazione della tabella Recensione
+CREATE TABLE Recensione (
+    utente INT,
+    libro INT,
+    valutazione INT CHECK(valutazione >= 1 AND valutazione <= 5),  -- supponiamo valutazione da 1 a 5
+    commento TEXT,
+    PRIMARY KEY (utente, libro),
+    FOREIGN KEY (utente) REFERENCES Utente(id) ON DELETE CASCADE,
+    FOREIGN KEY (libro) REFERENCES Libro(id) ON DELETE CASCADE
+);
+
+-- Creazione della tabella Acquisti
+CREATE TABLE Acquisti (
+    utente INT,
+    libro INT,
+    PRIMARY KEY (utente, libro),
+    FOREIGN KEY (utente) REFERENCES Utente(id) ON DELETE CASCADE,
+    FOREIGN KEY (libro) REFERENCES Libro(id) ON DELETE CASCADE
+);
+
+-- Inserimento dati nella tabella Utente
+INSERT INTO Utente (nome, email) VALUES ('Mario Rossi', 'mario.rossi@example.com');
+INSERT INTO Utente (nome, email) VALUES ('Lucia Bianchi', 'lucia.bianchi@example.com');
+INSERT INTO Utente (nome, email) VALUES ('Giuseppe Verdi', 'giuseppe.verdi@example.com');
+
+
+-- Inserimento dati nella tabella Libro
+INSERT INTO Libro (titolo, autore, genere, prezzo) VALUES ('Il Signore degli Anelli', 'J.R.R. Tolkien', 'Fantasy', 10.99);
+INSERT INTO Libro (titolo, autore, genere, prezzo) VALUES ('1984', 'George Orwell', 'Distopico', 8.99);
+INSERT INTO Libro (titolo, autore, genere, prezzo) VALUES ('Orgoglio e Pregiudizio', 'Jane Austen', 'Romantico', 7.99);
+
+
+-- Inserimento dati nella tabella Recensione
+-- Supponendo che gli ID degli utenti e dei libri siano quelli generati automaticamente a partire da 1, 
+-- Lucia Bianchi lascia una recensione per "Il Signore degli Anelli"
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (2, 1, 5, 'Un capolavoro assoluto del fantasy.');
+-- Giuseppe Verdi lascia una recensione per "1984"
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (3, 2, 4, 'Inquietante e profondo. Fa riflettere.');
+
+-- Inserimento dati nella tabella Acquisti
+-- Mario Rossi compra "Il Signore degli Anelli"
+INSERT INTO Acquisti (utente, libro) VALUES (1, 1);
+-- Lucia Bianchi compra "1984" e "Orgoglio e Pregiudizio"
+INSERT INTO Acquisti (utente, libro) VALUES (2, 2);
+INSERT INTO Acquisti (utente, libro) VALUES (2, 3);
+
+-- Nuovi utenti
+INSERT INTO Utente (nome, email) VALUES ('Natale pasquale', 'natale@pasquale.it');
+INSERT INTO Utente (nome, email) VALUES ('Antonio Giacomino', 'antogiacom@gmail.com');
+
+-- Nuovi libri
+INSERT INTO Libro (titolo, autore, genere, prezzo) VALUES ('After', 'Nicolas', 'Romantico', 7.99);
+INSERT INTO Libro (titolo, autore, genere, prezzo) VALUES ('Nel regno della fantasia', 'Geronimo Stilton', 'Fantasy', 10.99);
+INSERT INTO Libro (titolo, autore, genere, prezzo) VALUES ('Architettura Elaboratori e SO', 'Tanebau', 'Distopico', 8.99);
+INSERT INTO Libro (titolo, autore, genere, prezzo) VALUES ('Harry Potter', 'JKRowloing', 'Fantasy', 7.99);
+INSERT INTO Libro (titolo, autore, genere, prezzo) VALUES ('Amore e Psiche', 'Cicerone', 'Romantico', 14.99);
+INSERT INTO Libro (titolo, autore, genere, prezzo) VALUES ('Belle e Sebastien', 'San Bernardo', 'Distopico', 8.99);
+
+-- Nuovi acquisti
+INSERT INTO Acquisti (utente, libro) VALUES (1, 2);
+INSERT INTO Acquisti (utente, libro) VALUES (1, 3);
+INSERT INTO Acquisti (utente, libro) VALUES (1, 4);
+INSERT INTO Acquisti (utente, libro) VALUES (1, 5);
+INSERT INTO Acquisti (utente, libro) VALUES (1, 6);
+INSERT INTO Acquisti (utente, libro) VALUES (1, 7);
+INSERT INTO Acquisti (utente, libro) VALUES (1, 8);
+INSERT INTO Acquisti (utente, libro) VALUES (1, 9);
+
+INSERT INTO Acquisti (utente, libro) VALUES (2, 9);
+INSERT INTO Acquisti (utente, libro) VALUES (2, 6);
+
+INSERT INTO Acquisti (utente, libro) VALUES (3, 1);
+INSERT INTO Acquisti (utente, libro) VALUES (3, 5);
+INSERT INTO Acquisti (utente, libro) VALUES (3, 4);
+
+
+INSERT INTO Acquisti (utente, libro) VALUES (4, 2);
+INSERT INTO Acquisti (utente, libro) VALUES (4, 3);
+INSERT INTO Acquisti (utente, libro) VALUES (4, 4);
+INSERT INTO Acquisti (utente, libro) VALUES (4, 5);
+INSERT INTO Acquisti (utente, libro) VALUES (4, 6);
+INSERT INTO Acquisti (utente, libro) VALUES (4, 7);
+INSERT INTO Acquisti (utente, libro) VALUES (4, 8);
+INSERT INTO Acquisti (utente, libro) VALUES (4, 9);
+
+-- Nuove recensioni
+
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (1, 2, 3, 'Commento random.');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (1, 3, 4, 'Commento random.');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (1, 4, 5, 'Commento random.');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (1, 5, 1, 'Commento random.');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (1, 6, 3, 'Commento random.');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (1, 7, 4, 'Commento random.');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (1, 8, 5, 'Commento random.');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (1, 9, 1, 'Commento random.');
+
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (2, 9, 3, 'Commento random');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (2, 6, 4, 'Commento random');
+
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (3, 1, 4, 'Commento random');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (3, 5, 3, 'Commento random');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (3, 4, 2, 'Commento random');
+
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (4, 2, 3, 'Commento random');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (4, 3, 3, 'Commento random');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (4, 4, 3, 'Commento random');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (4, 5, 3, 'Commento random');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (4, 6, 3, 'Commento random');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (4, 7, 3, 'Commento random');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (4, 8, 3, 'Commento random');
+INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (4, 9, 3, 'Commento random');
+
+
+
+
+
+
+

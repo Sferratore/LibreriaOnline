@@ -147,6 +147,47 @@ public class LibreriaOnline {
 		}
 
 	}
+	
+	
+	public double mediaLibro(Libro l) {
+        double media = 0;
+        int recensioni = 0;
+        for(Recensione r : listaRecensioni) {
+            if(Integer.parseInt(r.getLibro()) == l.getId()) {
+                media += r.getValutazione();
+                recensioni++;
+            }
+        }
+
+        return media/recensioni;
+    }
+
+    public double mediaIdLibro(int i) {
+        double media = 0;
+        int recensioni = 0;
+        for(Recensione r : listaRecensioni) {
+            if(Integer.parseInt(r.getLibro()) == i) {
+                media += r.getValutazione();
+                recensioni++;
+            }
+        }
+
+        return media/recensioni;
+    }
+
+    public Libro getLibro(int i) {
+    	this.mostraLibri();
+        for (Libro l : listaLibri) {
+        	//System.out.println(l.getId());
+            if(l.getId() == i) {
+                System.out.println("trovato");
+                return l;
+
+            }else {
+                System.out.println("non trovato");
+            }
+        }return null;
+    }
 
 	private void sync() throws Exception {
 
