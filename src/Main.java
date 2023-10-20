@@ -14,18 +14,20 @@ public class Main {
 		l.setTitolo("Poggibonzi");
 		
 		
-		/*o.aggiungiLibro(l);
+		o.aggiungiLibro(l);
 		
 		o.mostraUtenti();
 		
-		u.setId(1);
+		u.setId(1); //mocking di utente 1
 		
+		
+		
+		//FINALITà
+		System.out.println(o.mediaIdLibro(3));
+		System.out.println(o.mediaLibro(o.getLibro(2)));
 		o.LibriConsigliati(u);
-		
 		o.LibriPopolari();
 		
-		System.out.println(o.mediaIdLibro(3));*/
-		System.out.println(o.mediaLibro(o.getLibro(2)));
 		
 		
 	}

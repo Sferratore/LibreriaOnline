@@ -97,6 +97,7 @@ public class LibreriaOnline {
 
 		PreparedStatement prpSt;
 		ResultSet rs;
+		boolean zeroRs = true;
 
 		try {
 			prpSt = this.connection.prepareStatement("CALL LibriConsigliati(?)");
@@ -104,6 +105,8 @@ public class LibreriaOnline {
 			rs = prpSt.executeQuery();
 
 			System.out.println("LIBRI CONSIGLIATI: ");
+			
+			
 			while (rs.next()) {
 				Libro l = new Libro();
 				l.setId(rs.getInt("id"));
@@ -112,6 +115,12 @@ public class LibreriaOnline {
 				l.setGenere(rs.getString("genere"));
 				l.setPrezzo((float) rs.getDouble("prezzo"));
 				System.out.println(l);
+				zeroRs = false;
+			}
+			
+			if(zeroRs) {
+				System.out.println("NESSUN LIBRO CONSIGLIATO. LIBRI POPOLARI:");
+				this.LibriPopolari();
 			}
 
 		} catch (SQLException e) {
