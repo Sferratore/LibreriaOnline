@@ -13,7 +13,8 @@ public class Main {
 		l.setTitolo("Poggibonzi");
 		
 		o.aggiungiLibro(l);
-		o.mostraLibri();
+		
+		o.mostraUtenti();
 	}
 
 }

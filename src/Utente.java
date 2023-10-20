@@ -38,6 +38,15 @@ public class Utente {
 	public void setLibriAcquistati(ArrayList<Libro> libriAcquistati) {
 		this.libriAcquistati = libriAcquistati;
 	}
+	
+	@Override
+	public String toString() {
+		return "Utente [id=" + id + ", nome=" + nome + ", email=" + email + ", libriAcquistati=" + libriAcquistati
+				+ "]";
+	}
+
+
+
 	private int id;
 	private String nome;
 	private String email;

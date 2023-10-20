@@ -51,6 +51,13 @@ public class LibreriaOnline {
 			
 	}
 	
+	public void mostraUtenti() {
+		for(Utente u : this.listaUtenti) {
+			System.out.println(u);
+		}
+			
+	}
+	
 	private void sync() throws Exception {
 
 		ArrayList<Utente> utentiDaAggiungere = new ArrayList<Utente>();
@@ -98,13 +105,29 @@ public class LibreriaOnline {
 			rs = prpSt.executeQuery();
 
 			while (rs.next()) {
+				
 				Utente u = new Utente();
+				ResultSet libriDiUtenteRs;
+				ArrayList<Libro> libriDiUtente = new ArrayList<Libro>();
+				
 				u.setId(rs.getInt("id"));
 				u.setNome(rs.getString("nome"));
 				u.setEmail(rs.getString("email"));
 				
-				u.setLibriAcquistati(null); //AGGIUNGERE LOGICA PER LIBRI ACQUISTATI!!!!!!!!!!!!!!
+				//Impostare libri acquistati
+				prpSt= this.connection.prepareStatement("SELECT * FROM Libro WHERE id in (SELECT libro FROM Acquisti WHERE utente = " + u.getId() + ")");
+				libriDiUtenteRs = prpSt.executeQuery();
 				
+				while(libriDiUtenteRs.next()) {
+					Libro l = new Libro();
+					l.setId(libriDiUtenteRs.getInt("id"));
+					l.setTitolo(libriDiUtenteRs.getString("titolo"));
+					l.setAutore(libriDiUtenteRs.getString("autore"));
+					l.setGenere(libriDiUtenteRs.getString("genere"));
+					l.setPrezzo ((float) libriDiUtenteRs.getDouble("prezzo"));
+					libriDiUtente.add(l);
+				}
+				u.setLibriAcquistati(libriDiUtente);
 				utentiDaAggiungere.add(u);
 				
 			}

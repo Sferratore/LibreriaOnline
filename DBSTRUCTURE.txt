@@ -1,0 +1,39 @@
+-- Creazione del database
+CREATE DATABASE LibreriaOnline;
+USE LibreriaOnline;
+
+-- Creazione della tabella Utente
+CREATE TABLE Utente (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL
+);
+
+-- Creazione della tabella Libro
+CREATE TABLE Libro (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titolo VARCHAR(255) NOT NULL,
+    autore VARCHAR(255) NOT NULL,
+    genere VARCHAR(255) NOT NULL,
+    prezzo DECIMAL(10,2) NOT NULL
+);
+
+-- Creazione della tabella Recensione
+CREATE TABLE Recensione (
+    utente INT,
+    libro INT,
+    valutazione INT CHECK(valutazione >= 1 AND valutazione <= 5),  -- supponiamo valutazione da 1 a 5
+    commento TEXT,
+    PRIMARY KEY (utente, libro),
+    FOREIGN KEY (utente) REFERENCES Utente(id) ON DELETE CASCADE,
+    FOREIGN KEY (libro) REFERENCES Libro(id) ON DELETE CASCADE
+);
+
+-- Creazione della tabella Acquisti
+CREATE TABLE Acquisti (
+    utente INT,
+    libro INT,
+    PRIMARY KEY (utente, libro),
+    FOREIGN KEY (utente) REFERENCES Utente(id) ON DELETE CASCADE,
+    FOREIGN KEY (libro) REFERENCES Libro(id) ON DELETE CASCADE
+);
