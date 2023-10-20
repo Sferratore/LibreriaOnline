@@ -33,14 +33,53 @@ public class LibreriaOnline {
 	// -------------------METHODS-------------------------
 	
 	public void aggiungiUtente(Utente u) {
+		String sql = "INSERT INTO Utente (id, nome, email) VALUES (?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, u.getId());
+            pstmt.setString(2, u.getNome());
+            pstmt.setString(3, u.getEmail());
+            
+            
+            //AGGIUNTA LISTA LIBRI?
+            
+            pstmt.executeUpdate();
+        }
+        catch(Exception e) {
+			System.out.println("Qualcosa è andato storto: " + e.toString());
+		}
+        
 		this.listaUtenti.add(u);
 	}
 	
 	public void aggiungiLibro(Libro l) {
+		
+		String sql = "INSERT INTO Libro (titolo, autore, genere, prezzo) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, l.getTitolo());
+            pstmt.setString(2, l.getAutore());
+            pstmt.setString(3, l.getGenere());
+            pstmt.setFloat(4, l.getPrezzo());
+            pstmt.executeUpdate();
+        }
+        catch(Exception e) {
+			System.out.println("Qualcosa è andato storto: " + e.toString());
+		}
+        
 		this.listaLibri.add(l);
 	}
 	
 	public void aggiungiRecensione(Recensione r) {
+		
+		String sql = "INSERT INTO Recensione (utente, libro, valutazione, commento) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, Integer.parseInt(r.getUtente()));
+            pstmt.setInt(2, Integer.parseInt(r.getLibro()));
+            pstmt.setInt(3, r.getValutazione());
+            pstmt.setString(4, r.getCommento());
+            pstmt.executeUpdate();
+        }catch(Exception e) {
+			System.out.println("Qualcosa è andato storto: " + e.toString());
+		}
 		this.listaRecensioni.add(r);
 	}
 
@@ -68,7 +107,7 @@ public class LibreriaOnline {
 			prpSt.setInt(1, u.getId());
 			rs = prpSt.executeQuery();
 			
-			System.out.println("LIBRI CONSIGLIATI: \n");
+			System.out.println("LIBRI CONSIGLIATI: ");
 			while(rs.next()) {
 				Libro l = new Libro();
 				l.setId(rs.getInt("id"));
