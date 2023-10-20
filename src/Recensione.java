@@ -1,4 +1,4 @@
-package com.module;
+
 
 public class Recensione {
 	

@@ -15,84 +15,47 @@ public class LibreriaOnline {
 	// -------------------CONSTRUCTORS--------------------
 
 	public LibreriaOnline() {
-		this.sync();
+		
+		this.listaLibri = new ArrayList<Libro>();
+		this.listaUtenti = new ArrayList<Utente>();
+		this.listaRecensioni = new ArrayList<Recensione>();
+		
+		this.connectToDb();
+		try {
+			this.sync();
+		}
+		catch(Exception e) {
+			System.out.println("Qualcosa è andato storto: " + e.toString());
+		}
+		
 	}
 
 	// -------------------METHODS-------------------------
-
-	/**
-	 * Registers a user inside the database and then resyncs.
-	 * 
-	 * @param u user to be registered
-	 * @return true if the operation is successful, false otherwhise.
-	 */
-	public boolean registerUser(User u) {
-
-		try (FileWriter file = new FileWriter("users.txt")) {
-
-			// Checking for username duplication
-			for (int i = 0; i < this.users.size(); i++) {
-				if (this.users.get(i).getUsername().equals(u.getUsername())) {
-					throw new Exception("Username already exists");
-				}
-			}
-
-			// Adding the user
-			file.append("Username: " + u.getUsername() + "\n");
-			file.append("Password: " + u.getPassword() + "\n");
-			file.append("isAdmin: false\n");
-			file.append("---\n");
-
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-
-		this.sync();
-
-		return true;
-	}
-
-	/**
-	 * Searches for the user inside the database to see if credentials are valid.
-	 * 
-	 * @param u user to be checked.
-	 * @return result of the logIn.
-	 */
-	public boolean logUserIn(User u) {
-
-		this.sync();
-		for (int i = 0; i < this.users.size(); i++) {
-			if (this.users.get(i).getUsername().equals(u.getUsername())
-					&& this.users.get(i).getPassword().equals(u.getPassword())
-					&& this.users.get(i).isAdmin() == u.isAdmin()) {
-				return true;
-			}
-		}
-		return false;
-
-	}
 	
-	private void aggiungiUtente(Utente u) {
+	public void aggiungiUtente(Utente u) {
 		this.listaUtenti.add(u);
 	}
 	
-	private void aggiungiLibro(Libro l) {
+	public void aggiungiLibro(Libro l) {
 		this.listaLibri.add(l);
 	}
 	
-	private void aggiungiRecensione(Recensione r) {
-		this.listaLibri.add(r);
+	public void aggiungiRecensione(Recensione r) {
+		this.listaRecensioni.add(r);
 	}
 
-	private void sync() {
+	public void mostraLibri() {
+		for(Libro l : this.listaLibri) {
+			System.out.println(l);
+		}
+			
+	}
+	
+	private void sync() throws Exception {
 
-		List<Utente> utentiDaAggiungere = new ArrayList<Utente>();
-		List<Libro> libriDaAggiungere = new ArrayList<Libro>();
-		List<Recensione> recensioniDaAggiungere = new ArrayList<Recensione>();
+		ArrayList<Utente> utentiDaAggiungere = new ArrayList<Utente>();
+		ArrayList<Libro> libriDaAggiungere = new ArrayList<Libro>();
+		ArrayList<Recensione> recensioniDaAggiungere = new ArrayList<Recensione>();
 
 		// Utilities
 		PreparedStatement prpSt;
@@ -114,7 +77,7 @@ public class LibreriaOnline {
 				l.setTitolo(rs.getString("titolo"));
 				l.setAutore(rs.getString("autore"));
 				l.setGenere(rs.getString("genere"));
-				l.setPrezzo (rs.getDouble("prezzo"));
+				l.setPrezzo ((float) rs.getDouble("prezzo"));
 				libriDaAggiungere.add(l);
 			}
 
@@ -126,43 +89,42 @@ public class LibreriaOnline {
 				r.setUtente(rs.getString("utente"));
 				r.setLibro(rs.getString("libro"));
 				r.setValutazione(rs.getInt("valutazione"));
-				r.setCommento(rs.getString("totalCost"));
+				r.setCommento(rs.getString("commento"));
 				recensioniDaAggiungere.add(r);
 			}
 
 			// Aggiunta Utenti
-			prpSt = this.connection.prepareStatement("SELECT * FROM product");
+			prpSt = this.connection.prepareStatement("SELECT * FROM Utente");
 			rs = prpSt.executeQuery();
 
 			while (rs.next()) {
 				Utente u = new Utente();
-				p.setId(rs.getInt("id"));
-				p.setNome(rs.getString("nome"));
-				p.setEmail(rs.getString("email"));
+				u.setId(rs.getInt("id"));
+				u.setNome(rs.getString("nome"));
+				u.setEmail(rs.getString("email"));
 				
-				p.setLibriAcquistati(null); //AGGIUNGERE LOGICA PER LIBRI ACQUISTATI!!!!!!!!!!!!!!
+				u.setLibriAcquistati(null); //AGGIUNGERE LOGICA PER LIBRI ACQUISTATI!!!!!!!!!!!!!!
 				
 				utentiDaAggiungere.add(u);
 				
 			}
-
-			// Build store object
-			this.dbStore = new Store(productsToAdd, clientsToAdd, ordersToAdd);
-			return "Operation successful.";
-
+			
+			this.listaLibri = libriDaAggiungere;
+			this.listaRecensioni = recensioniDaAggiungere;
+			this.listaUtenti = utentiDaAggiungere;
+			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			return "Something went wrong with SQL operations: " + e.toString();
+			System.out.println("Something went wrong with SQL operations: " + e.toString());
 		} catch (Exception e) {
-			return "Something went wrong with the operation: " + e.toString();
+			System.out.println("Something went wrong with the operation: " + e.toString());
 		}
 
 	}
 
 	public String connectToDb() {
-
+		
 		try {
-
 			Class.forName(JConnectionClass);
 		} catch (ClassNotFoundException e) {
 			return "The class " + JConnectionClass + " has not been found by the program.";
@@ -192,5 +154,5 @@ public class LibreriaOnline {
 	public static String JConnectionClass = "com.mysql.cj.jdbc.Driver";
 	public static String dbUsername = "root";
 	public static String dbPassword = "password";
-	public static String dbName = "LibreriaOnline";
+	public static String dbName = "libreriaonline";
 }

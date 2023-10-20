@@ -1,4 +1,4 @@
-package com.module;
+
 
 public class Libro {
 
@@ -49,6 +49,11 @@ public class Libro {
 		this.prezzo = prezzo;
 	}
 
+	 @Override
+	    public String toString() {
+	        return "Libro [id=" + id + ", titolo=" + titolo + ", autore=" + autore + ", genere=" + genere + ", prezzo=" + prezzo + "]";
+	    }
+	 
 	private int id;
 	private String titolo;
 	private String autore;
